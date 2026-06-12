@@ -17,7 +17,6 @@ const validateSignup = [
     body("displayName")
     .trim()
     .isLength({ min: 1, max: 50 }).withMessage(`Display name must be between 1 to 50 characters.`),
-
     emailValidator
     .custom(async (value) => {
         const user = await prisma.user.findUnique({
@@ -25,13 +24,11 @@ const validateSignup = [
         });
         if(user) throw new Error("E-mail already in use!")
     }),
-
     passwordValidator
 ]
 
 const validateLogin = [
     emailValidator,
-
     passwordValidator
 ]
 

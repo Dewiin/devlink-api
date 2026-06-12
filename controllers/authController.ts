@@ -1,9 +1,10 @@
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 
 //config
 import { prisma } from "../config/prismaClient";
+
+// services
+import { issueTokens, createSession } from "../services/auth";
 
 // types
 import type { Request, Response } from "express";
@@ -23,41 +24,15 @@ async function signup(req: Request, res: Response) {
             }
         });
 
-        const payload = {
+        const { accessToken, refreshToken } = issueTokens(user);
+        const session = await createSession(user.id, refreshToken);
+        if(!session) return res.status(400).json({ error: "Failed to create session." });
+
+        const userDetails = {
             id: user.id,
             displayName: user.displayName,
             email: user.email
         }
-        const accessToken = jwt.sign(
-            payload,
-            process.env.JWT_SECRET_KEY!, 
-            { expiresIn: "10m" }
-        );
-
-        const refreshToken = jwt.sign(
-            { id: user.id },
-            process.env.REFRESH_SECRET_KEY!,
-            { expiresIn: "7d" }
-        )
-        const decoded = jwt.verify(
-            refreshToken,
-            process.env.REFRESH_SECRET_KEY!
-        ) as jwt.JwtPayload;
-        const expiresAt = new Date((decoded.exp as number) * 1000);
-
-        const hashedToken = crypto
-            .createHash("sha256")
-            .update(refreshToken)
-            .digest("hex")
-
-        await prisma.session.create({
-            data: {
-                hashedToken,
-                expiresAt,
-                userId: user.id
-            }
-        });
-
 
         return res.status(201)
         .cookie("refreshToken", refreshToken, {
@@ -68,7 +43,7 @@ async function signup(req: Request, res: Response) {
         .json({
             message: "User successfully signed up!",
             accessToken,
-            user: payload
+            user: userDetails
         });
     } catch(err: any) {
         console.error("Error in signup: ", err);
@@ -80,9 +55,43 @@ async function signup(req: Request, res: Response) {
 
 async function login(req: Request, res: Response) {
     try {
+        const { email, password } = req.body;
 
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
+        if(!user) return res.status(404).json({ error: "Email or password is incorrect." });
+        if(!user.password) return res.status(403).json({ error: "This email is associated with a google acccount." });
+
+        const match = bcrypt.compare(password, user.password);
+        if(!match) return res.status(403).json({ error: "Email or password is incorrect" });
+
+        const { accessToken, refreshToken } = issueTokens(user);
+        const session = await createSession(user.id, refreshToken);
+        if(!session) return res.status(400).json({ error: "Failed to create session." });
+
+        const userDetails = {
+            id: user.id,
+            displayName: user.displayName,
+            email: user.email
+        }
+
+        return res.status(201)
+        .cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        })
+        .json({
+            message: "User successfully logged in!",
+            accessToken,
+            user: userDetails
+        })
     } catch(err: any) {
-        console.error("Error in signup: ", err);
+        console.error("Error in login: ", err);
+        return res.status(500).json({
+            error: "Server error logging in."
+        });
     }
 };
 
