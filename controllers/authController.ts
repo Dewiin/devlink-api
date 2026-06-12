@@ -1,12 +1,15 @@
 import { prisma } from "../config/prismaClient";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 // types
 import type { Request, Response } from "express";
 
 async function signup(req: Request, res: Response) {
     try {
-
+        const { displayName, email, password } = req.body;
+        
     } catch(err: any) {
         console.error("Error in signup: ", err);
     }
