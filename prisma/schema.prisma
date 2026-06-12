@@ -12,8 +12,44 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Provider {
+  LOCAL
+  GOOGLE
+}
+
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id          String   @id @default(uuid())
+  displayName String
+  email       String   @unique
+  password    String?
+  provider    Provider
+
+  // relations
+  messages Message[]
+
+  @@index([id])
+  @@map("users")
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  messages Message[]
+
+  @@index([id])
+  @@map("conversations")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  // relations
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  senderId String
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
 }
