@@ -52,3 +52,16 @@ export async function createSession(userId: string, refreshToken: string) {
     
     return session;
 }
+
+export async function deleteSession(refreshToken: string) {
+    if(refreshToken) {
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(refreshToken)
+            .digest("hex");
+
+        await prisma.session.deleteMany({
+            where: { hashedToken },  
+        });
+    }
+}
