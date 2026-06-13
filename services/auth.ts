@@ -6,6 +6,7 @@ import { prisma } from "../config/prismaClient"
 
 // types
 import type { User } from "../generated/prisma/client"
+import type { Request } from "express"
 
 export function issueTokens(user: User) {
     const payload = {
@@ -27,6 +28,41 @@ export function issueTokens(user: User) {
     )
 
     return { accessToken, refreshToken };
+}
+
+export async function refreshToken(refreshToken: string) {
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(refreshToken)
+        .digest("hex")
+
+    const token = await prisma.session.findFirst({
+        where: { hashedToken }
+    });
+
+
+}
+
+export function getAccessToken(req: Request) {
+    const authHeader = req.headers["authorization"];
+    if(!authHeader) return null;
+
+    const accessToken = authHeader.split(" ")[1];
+    if(!accessToken) return null;
+
+    return accessToken;
+}
+
+export function getRefreshHashToken(req: Request) {
+    const refreshToken = req.cookies.refreshToken;
+    if(!refreshToken) return {}
+
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(refreshToken)
+        .digest("hex")
+
+    return { refreshToken, hashedToken };
 }
 
 export async function createSession(userId: string, refreshToken: string) {

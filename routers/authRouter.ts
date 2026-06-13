@@ -13,3 +13,4 @@ authRouter.post("/login", authValidator.validateLogin, validateRequest, authCont
 authRouter.get("/logout", authController.logout);
 
 authRouter.get("/me", verifyAuth, authController.getCurrentUser);
+authRouter.get("/refresh", verifyAuth, authController.refreshToken);

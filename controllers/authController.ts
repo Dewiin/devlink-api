@@ -5,10 +5,19 @@ import jwt from "jsonwebtoken";
 import { prisma } from "../config/prismaClient";
 
 // services
-import { issueTokens, createSession, deleteSession } from "../services/auth";
+import { 
+    issueTokens, 
+    getAccessToken,
+    getRefreshHashToken,
+    createSession, 
+    deleteSession, 
+} from "../services/auth";
 
 // types
 import type { Request, Response } from "express";
+
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY!;
+const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY!;
 
 async function signup(req: Request, res: Response) {
     try {
@@ -106,20 +115,75 @@ async function logout(req: Request, res: Response) {
             message: "User successfully logged out!"
         });
     } catch(err: any) {
-        console.error("Error in signup: ", err);
+        console.error("Error in logout: ", err);
+        return res.status(500).json({
+            error: "Server error logging out."
+        });
     }
 };
 
 async function getCurrentUser(req: Request, res: Response) {
-    const authHeader = req.headers["authorization"];
-    if(!authHeader) return res.status(400).json({ error: "Token is missing." })
-
-    const accessToken = authHeader.split(" ")[1];
-    if(!accessToken) return res.status(401).json({ error: "Token is missing." });
-
-    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET_KEY!);
+    try {
+        const accessToken = getAccessToken(req);
+        if(!accessToken) return res.status(404).json({ error: "Token is missing." })
     
-    return res.status(200).json({ user: decoded });
+        const decoded = jwt.verify(accessToken, JWT_SECRET_KEY);
+        
+        return res.status(200).json({ user: decoded });
+    } catch(err: any) {
+        console.error("Error in getCurrentUser: ", err);
+        return res.status(500).json({
+            error: "Server error fetching user credentials."
+        })
+    }
+}
+
+async function refreshToken(req: Request, res: Response) {
+    try {
+        const { refreshToken, hashedToken } = getRefreshHashToken(req);
+        if(!hashedToken) return res.status(404).json({ error: "Refresh token is missing." });
+
+        const payload = jwt.verify(
+            refreshToken,
+            REFRESH_SECRET_KEY
+        ) as jwt.JwtPayload;
+        const session = await prisma.session.findFirst({
+            where: {
+                hashedToken,
+                userId: payload.id
+            },
+            include: { user: true }
+        });
+        if(!session) return res.status(404).json({ error: "Session not found." });
+        
+        // issue new refresh token
+        await deleteSession(refreshToken);
+        const tokens = issueTokens(session.user);
+        const newSession = await createSession(session.userId, tokens.refreshToken);
+        if(!newSession) return res.status(400).json({ error: "Failed to create session." });
+        
+        const userDetails = {   
+            id: session.userId,
+            displayName: session.user.displayName,
+            email: session.user.email,
+        }
+        
+        return res.status(200)
+        .cookie("refreshToken", tokens.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        })
+        .json({
+            accessToken: tokens.accessToken,
+            user: userDetails
+        })
+    } catch(err: any) {
+        console.error("Error in refreshToken: ", err);
+        return res.status(500).json({
+            error: "Server error renewing session."
+        });
+    }
 }
 
 export const authController = {
@@ -127,4 +191,5 @@ export const authController = {
     login,
     logout,
     getCurrentUser,
+    refreshToken
 }
