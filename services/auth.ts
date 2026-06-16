@@ -8,6 +8,9 @@ import { prisma } from "../config/prismaClient"
 import type { User } from "../generated/prisma/client"
 import type { Request } from "express"
 
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY!;
+const JWT_REFRESH_KEY = process.env.JWT_REFRESH_KEY!;
+
 export function issueTokens(user: User) {
     const payload = {
         id: user.id,
@@ -17,30 +20,17 @@ export function issueTokens(user: User) {
 
     const accessToken = jwt.sign(
         payload,
-        process.env.JWT_SECRET_KEY!, 
+        JWT_SECRET_KEY, 
         { expiresIn: "10m" }
     );
 
     const refreshToken = jwt.sign(
         { id: user.id },
-        process.env.REFRESH_SECRET_KEY!,
+        JWT_REFRESH_KEY,
         { expiresIn: "7d" }
     )
 
     return { accessToken, refreshToken };
-}
-
-export async function refreshToken(refreshToken: string) {
-    const hashedToken = crypto
-        .createHash("sha256")
-        .update(refreshToken)
-        .digest("hex")
-
-    const token = await prisma.session.findFirst({
-        where: { hashedToken }
-    });
-
-
 }
 
 export function getAccessToken(req: Request) {
@@ -68,7 +58,7 @@ export function getRefreshHashToken(req: Request) {
 export async function createSession(userId: string, refreshToken: string) {
     const decoded = jwt.verify(
         refreshToken,
-        process.env.REFRESH_SECRET_KEY!
+        JWT_REFRESH_KEY
     ) as jwt.JwtPayload;
 
     const expiresAt = new Date((decoded.exp as number) * 1000);

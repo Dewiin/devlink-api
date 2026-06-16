@@ -7,10 +7,9 @@ import { validateRequest } from "../middleware/validateRequest";
 import { verifyAuth } from "../middleware/verifyAuth";
 
 export const authRouter = Router();
-
 authRouter.post("/signup", authValidator.validateSignup, validateRequest, authController.signup);
 authRouter.post("/login", authValidator.validateLogin, validateRequest, authController.login);
 authRouter.get("/logout", authController.logout);
 
 authRouter.get("/me", verifyAuth, authController.getCurrentUser);
-authRouter.get("/refresh", verifyAuth, authController.refreshToken);
+authRouter.get("/refresh", authController.refreshToken);

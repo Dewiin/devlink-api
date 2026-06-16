@@ -17,7 +17,7 @@ import {
 import type { Request, Response } from "express";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY!;
-const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY!;
+const JWT_REFRESH_KEY = process.env.JWT_REFRESH_KEY!;
 
 async function signup(req: Request, res: Response) {
     try {
@@ -145,7 +145,7 @@ async function refreshToken(req: Request, res: Response) {
 
         const payload = jwt.verify(
             refreshToken,
-            REFRESH_SECRET_KEY
+            JWT_REFRESH_KEY
         ) as jwt.JwtPayload;
         const session = await prisma.session.findFirst({
             where: {
@@ -162,12 +162,6 @@ async function refreshToken(req: Request, res: Response) {
         const newSession = await createSession(session.userId, tokens.refreshToken);
         if(!newSession) return res.status(400).json({ error: "Failed to create session." });
         
-        const userDetails = {   
-            id: session.userId,
-            displayName: session.user.displayName,
-            email: session.user.email,
-        }
-        
         return res.status(200)
         .cookie("refreshToken", tokens.refreshToken, {
             httpOnly: true,
@@ -175,8 +169,7 @@ async function refreshToken(req: Request, res: Response) {
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
         .json({
-            accessToken: tokens.accessToken,
-            user: userDetails
+            accessToken: tokens.accessToken 
         })
     } catch(err: any) {
         console.error("Error in refreshToken: ", err);

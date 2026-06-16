@@ -8,7 +8,7 @@ export function validateRequest(req: Request, res: Response, next: NextFunction)
 
     if(!errors.isEmpty()) {
         return res.status(400).json({
-            error: errors.array({onlyFirstError: true})
+            error: errors.array()[0]?.msg,
         });
     }
 
