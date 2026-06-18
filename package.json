@@ -28,6 +28,11 @@
     "express": "^5.2.1",
     "express-validator": "^7.3.2",
     "jsonwebtoken": "^9.0.3",
+    "passport": "^0.7.0",
+    "passport-github": "^1.1.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-local": "^1.0.0",
+    "passport-oauth2": "^1.8.0",
     "pg": "^8.21.0"
   },
   "devDependencies": {
@@ -36,6 +41,10 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.9.2",
+    "@types/passport": "^1.0.17",
+    "@types/passport-github": "^1.1.13",
+    "@types/passport-google-oauth20": "^2.0.17",
+    "@types/passport-local": "^1.0.38",
     "dotenv": "^17.4.2",
     "prisma": "^7.8.0",
     "tsx": "^4.22.4",
