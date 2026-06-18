@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 
 // routers
 import { authRouter } from "./routers/authRouter";
+import { userRouter } from "./routers/userRouter";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use(cookieParser());
 // routes
 app.get("/api", (req, res) => res.json({ message: "Welcome to the API." }));
 app.use("/api/auth", authRouter);
+app.use("/api/users/", userRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on Port ${PORT}`));
