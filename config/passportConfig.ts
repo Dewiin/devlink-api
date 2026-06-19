@@ -87,14 +87,16 @@ async function githubVerifyFunction(
     }
 }
 
-passport.use(new LocalStrategy(localVerifyFunction));
-passport.use(new GoogleStrategy({
+passport.use("local", new LocalStrategy({
+    usernameField: "email",
+}, localVerifyFunction));
+passport.use("google", new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    callbackURL: "http://www.example.com/auth/google/callback"
+    callbackURL: "http://localhost:3000/api/auth/google/callback"
 }, googleVerifyFunction));
-passport.use(new GithubStrategy({
+passport.use("github", new GithubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID!,
     clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    callbackURL: "http://127.0.0.1:3000/auth/github/callback"
+    callbackURL: "http://localhost:3000/api/auth/github/callback"
 }, githubVerifyFunction));

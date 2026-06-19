@@ -6,6 +6,9 @@ import cookieParser from "cookie-parser";
 import { authRouter } from "./routers/authRouter";
 import { userRouter } from "./routers/userRouter";
 
+// config
+import "./config/passportConfig"
+
 const app = express();
 
 const allowedOrigins = [
