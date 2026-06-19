@@ -7,7 +7,6 @@ import { prisma } from "../config/prismaClient";
 // services
 import { 
     issueTokens, 
-    getAccessToken,
     getRefreshHashToken,
     createSession, 
     deleteSession, 
@@ -51,9 +50,13 @@ async function signup(req: Request, res: Response) {
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
+        .cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        })
         .json({
             message: "User successfully signed up!",
-            accessToken,
             user: userDetails
         });
     } catch(err: any) {
@@ -84,9 +87,13 @@ async function login(req: Request, res: Response) {
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
+        .cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        })
         .json({
             message: "User successfully logged in!",
-            accessToken,
             user: userDetails
         });
     } catch(err: any) {
@@ -102,8 +109,10 @@ async function logout(req: Request, res: Response) {
         const refreshToken = req.cookies.refreshToken;
         await deleteSession(refreshToken);
         
-        res.clearCookie("refreshToken");
-        return res.status(200).json({
+        return res.status(200)
+        .clearCookie("refreshToken")
+        .clearCookie("accessToken")
+        .json({
             message: "User successfully logged out!"
         });
     } catch(err: any) {
@@ -116,7 +125,7 @@ async function logout(req: Request, res: Response) {
 
 async function getCurrentUser(req: Request, res: Response) {
     try {
-        const accessToken = getAccessToken(req);
+        const accessToken = req.cookies.accessToken;
         if(!accessToken) return res.status(404).json({ error: "Token is missing." })
     
         const decoded = jwt.verify(accessToken, JWT_SECRET_KEY);
@@ -124,13 +133,18 @@ async function getCurrentUser(req: Request, res: Response) {
         return res.status(200).json({ user: decoded });
     } catch(err: any) {
         console.error("Error in getCurrentUser: ", err);
+        if (err instanceof jwt.JsonWebTokenError) {
+            return res.status(401).json({
+                error: "Invalid token"
+            });
+        }
         return res.status(500).json({
             error: "Server error fetching user credentials."
         })
     }
 }
 
-async function refreshToken(req: Request, res: Response) {
+async function refresh(req: Request, res: Response) {
     try {
         const { refreshToken, hashedToken } = getRefreshHashToken(req);
         if(!hashedToken) return res.status(404).json({ error: "Refresh token is missing." });
@@ -160,9 +174,12 @@ async function refreshToken(req: Request, res: Response) {
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
-        .json({
-            accessToken: tokens.accessToken 
+        .cookie("accessToken", tokens.accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
+        .json({ message: "Token refreshed." });
     } catch(err: any) {
         console.error("Error in refreshToken: ", err);
         return res.status(500).json({
@@ -176,5 +193,5 @@ export const authController = {
     login,
     logout,
     getCurrentUser,
-    refreshToken
+    refresh
 }

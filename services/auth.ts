@@ -33,16 +33,6 @@ export function issueTokens(user: User) {
     return { accessToken, refreshToken };
 }
 
-export function getAccessToken(req: Request) {
-    const authHeader = req.headers["authorization"];
-    if(!authHeader) return null;
-
-    const accessToken = authHeader.split(" ")[1];
-    if(!accessToken) return null;
-
-    return accessToken;
-}
-
 export function getRefreshHashToken(req: Request) {
     const refreshToken = req.cookies.refreshToken;
     if(!refreshToken) return {}

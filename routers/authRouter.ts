@@ -10,7 +10,7 @@ import { verifyAuth } from "../middleware/verifyAuth";
 export const authRouter = Router();
 
 authRouter.get("/me", verifyAuth, authController.getCurrentUser);
-authRouter.get("/refresh", authController.refreshToken);
+authRouter.get("/refresh", authController.refresh);
 
 // local auth
 authRouter.post(
@@ -38,7 +38,7 @@ authRouter.get(
 authRouter.get(
     "/google", 
     passport.authenticate("google", { 
-        scope: ["profile"],
+        scope: ["profile", "email"],
         session: false,
         prompt: "select_account" 
     })
@@ -47,7 +47,7 @@ authRouter.get(
     "/google/callback", 
     passport.authenticate("google", { 
         session: false,
-        failureRedirect: process.env.CLIENT_URL 
+        failureRedirect: process.env.CLIENT_URL
     }),
     authController.login
 );
@@ -56,7 +56,7 @@ authRouter.get(
 authRouter.get(
     "/github",
     passport.authenticate("github", {
-        scope: ["profile"],
+        scope: ["profile", "email"],
         session: false,
         prompt: "select_account"
     })
