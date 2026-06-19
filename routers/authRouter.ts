@@ -49,14 +49,14 @@ authRouter.get(
         session: false,
         failureRedirect: process.env.CLIENT_URL
     }),
-    authController.login
+    authController.oauthLogin
 );
 
 // github oauth
 authRouter.get(
     "/github",
     passport.authenticate("github", {
-        scope: ["profile", "email"],
+        scope: ["profile"],
         session: false,
         prompt: "select_account"
     })
@@ -67,5 +67,5 @@ authRouter.get(
         session: false,
         failureRedirect: process.env.CLIENT_URL
     }),
-    authController.login
+    authController.oauthLogin
 )

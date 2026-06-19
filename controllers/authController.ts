@@ -104,6 +104,34 @@ async function login(req: Request, res: Response) {
     }
 };
 
+async function oauthLogin(req: Request, res: Response) {
+    try {
+        const user = req.user as User;
+
+        const { accessToken, refreshToken } = issueTokens(user);
+        const session = await createSession(user.id, refreshToken);
+        if(!session) return res.status(400).json({ error: "Failed to create session." });
+
+        return res.status(201)
+        .cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        })
+        .cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        })
+        .redirect(process.env.CLIENT_URL!);
+    } catch(err: any) {
+        console.error("Error in oauthLogin: ", err);
+        return res.status(500).json({
+            error: "Server error logging in."
+        });
+    }
+}
+
 async function logout(req: Request, res: Response) {
     try {
         const refreshToken = req.cookies.refreshToken;
@@ -125,12 +153,10 @@ async function logout(req: Request, res: Response) {
 
 async function getCurrentUser(req: Request, res: Response) {
     try {
-        const accessToken = req.cookies.accessToken;
-        if(!accessToken) return res.status(404).json({ error: "Token is missing." })
-    
-        const decoded = jwt.verify(accessToken, JWT_SECRET_KEY);
+        const user = req.user;
+        if(!user) return res.status(404).json({ error: "No user found." });
         
-        return res.status(200).json({ user: decoded });
+        return res.status(200).json({ user });
     } catch(err: any) {
         console.error("Error in getCurrentUser: ", err);
         if (err instanceof jwt.JsonWebTokenError) {
@@ -191,6 +217,7 @@ async function refresh(req: Request, res: Response) {
 export const authController = {
     signup,
     login,
+    oauthLogin,
     logout,
     getCurrentUser,
     refresh

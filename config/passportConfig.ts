@@ -69,7 +69,7 @@ async function githubVerifyFunction(
 ) {
     try {
         const email = profile.emails?.[0]?.value;
-        if(!email) return cb(new Error("No email found in google profile."));
+        if(!email) return cb(new Error("No email found in github profile."));
 
         const user = await prisma.user.upsert({
             where: { email },
