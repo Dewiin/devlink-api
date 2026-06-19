@@ -1,3 +1,4 @@
+import passport from "passport"
 import { Router } from "express";
 import { authController } from "../controllers/authController";
 
@@ -7,9 +8,64 @@ import { validateRequest } from "../middleware/validateRequest";
 import { verifyAuth } from "../middleware/verifyAuth";
 
 export const authRouter = Router();
-authRouter.post("/signup", authValidator.validateSignup, validateRequest, authController.signup);
-authRouter.post("/login", authValidator.validateLogin, validateRequest, authController.login);
-authRouter.get("/logout", authController.logout);
 
 authRouter.get("/me", verifyAuth, authController.getCurrentUser);
 authRouter.get("/refresh", authController.refreshToken);
+
+// local auth
+authRouter.post(
+    "/signup",
+    authValidator.validateSignup, 
+    validateRequest, 
+    authController.signup
+);
+authRouter.post(
+    "/login", 
+    authValidator.validateLogin, 
+    validateRequest, 
+    passport.authenticate("local", {
+        session: false,
+        failureRedirect: process.env.CLIENT_URL
+    }),
+    authController.login
+);
+authRouter.get(
+    "/logout",
+    authController.logout
+);
+
+// google oauth
+authRouter.get(
+    "/google", 
+    passport.authenticate("google", { 
+        scope: ["profile"],
+        session: false,
+        prompt: "select_account" 
+    })
+);
+authRouter.get(
+    "/google/callback", 
+    passport.authenticate("google", { 
+        session: false,
+        failureRedirect: process.env.CLIENT_URL 
+    }),
+    authController.login
+);
+
+// github oauth
+authRouter.get(
+    "/github",
+    passport.authenticate("github", {
+        scope: ["profile"],
+        session: false,
+        prompt: "select_account"
+    })
+);
+authRouter.get(
+    "/github/callback", 
+    passport.authenticate("github", {
+        session: false,
+        failureRedirect: process.env.CLIENT_URL
+    }),
+    authController.login
+)

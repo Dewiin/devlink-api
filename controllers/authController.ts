@@ -15,6 +15,7 @@ import {
 
 // types
 import type { Request, Response } from "express";
+import type { User } from "../generated/prisma/client";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY!;
 const JWT_REFRESH_KEY = process.env.JWT_REFRESH_KEY!;
@@ -65,16 +66,7 @@ async function signup(req: Request, res: Response) {
 
 async function login(req: Request, res: Response) {
     try {
-        const { email, password } = req.body;
-
-        const user = await prisma.user.findUnique({
-            where: { email }
-        });
-        if(!user) return res.status(404).json({ error: "Email or password is incorrect." });
-        if(!user.password) return res.status(403).json({ error: "This email is associated with a google acccount." });
-
-        const match = bcrypt.compare(password, user.password);
-        if(!match) return res.status(403).json({ error: "Email or password is incorrect" });
+        const user = req.user as User;
 
         const { accessToken, refreshToken } = issueTokens(user);
         const session = await createSession(user.id, refreshToken);
