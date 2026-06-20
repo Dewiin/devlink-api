@@ -68,15 +68,12 @@ async function githubVerifyFunction(
     cb: GithubVerifyCallback
 ) {
     try {
-        const email = profile.emails?.[0]?.value;
-        if(!email) return cb(new Error("No email found in github profile."));
-
         const user = await prisma.user.upsert({
-            where: { email },
-            update: { displayName: profile.displayName },
+            where: { email: profile.profileUrl },
+            update: { displayName: profile.username || profile.displayName },
             create: {
-                email,
-                displayName: profile.displayName,
+                email: profile.profileUrl,
+                displayName: profile.username || profile.displayName,
                 provider: "GITHUB"
             }
         });
@@ -93,10 +90,12 @@ passport.use("local", new LocalStrategy({
 passport.use("google", new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    callbackURL: "http://localhost:3000/api/auth/google/callback"
+    callbackURL: "http://localhost:3000/api/auth/google/callback",
+    scope: ["profile", "email"]
 }, googleVerifyFunction));
 passport.use("github", new GithubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID!,
     clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    callbackURL: "http://localhost:3000/api/auth/github/callback"
+    callbackURL: "http://localhost:3000/api/auth/github/callback",
+    scope: ["user"]
 }, githubVerifyFunction));

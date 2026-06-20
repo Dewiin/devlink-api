@@ -38,7 +38,6 @@ authRouter.get(
 authRouter.get(
     "/google", 
     passport.authenticate("google", { 
-        scope: ["profile", "email"],
         session: false,
         prompt: "select_account" 
     })
@@ -56,9 +55,7 @@ authRouter.get(
 authRouter.get(
     "/github",
     passport.authenticate("github", {
-        scope: ["profile"],
         session: false,
-        prompt: "select_account"
     })
 );
 authRouter.get(
