@@ -10,4 +10,5 @@ export const chatRouter = Router();
 chatRouter.get("/", chatController.getGlobalChat);
 chatRouter.post("/", verifyAuth, messageValidator.validateMessage, chatController.postGlobalChat);
 chatRouter.get("/:recipientId", verifyAuth, chatController.getChatByRecipientId);
+chatRouter.post("/:conversationId", verifyAuth, messageValidator.validateMessage, chatController.postChatByRecipientId);
 

@@ -118,6 +118,37 @@ async function getChatByRecipientId(
         console.error("Error in getChatByUserId: ", err);
         return res.status(500).json({
             error: "Chat failed to load."
+        });
+    }
+}
+
+async function postChatByRecipientId(
+    req: Request<{ conversationId: string }>,
+    res: Response
+) {
+    try {
+        const { conversationId } = req.params;
+        const { content } = req.body;
+        const user = req.user as User;
+
+        const message = await prisma.message.create({
+            data: {
+                content,
+                senderId: user.id,
+                conversationId,
+            },
+            include: {
+                sender: true
+            }
+        });
+
+        return res.status(201).json({
+            message
+        });
+    } catch(err: any) {
+        console.error("Error in postChatByRecipientId: ", err);
+        return res.status(500).json({
+            error: "Chat failed to load."
         })
     }
 }
@@ -125,5 +156,6 @@ async function getChatByRecipientId(
 export const chatController = {
     getGlobalChat,
     postGlobalChat,
-    getChatByRecipientId
+    getChatByRecipientId,
+    postChatByRecipientId
 }
