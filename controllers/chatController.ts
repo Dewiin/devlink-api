@@ -85,7 +85,8 @@ async function getChatByRecipientId(
                 messages: {
                     include: { sender: true },
                     orderBy: { createdAt: "asc" }
-                }
+                },
+                participants: true,
             }
         });
 
@@ -103,7 +104,8 @@ async function getChatByRecipientId(
                     messages: {
                         include: { sender: true },
                         orderBy: { createdAt: "asc" }   
-                    }
+                    },
+                    participants: true,
                 }
             });
         }

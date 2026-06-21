@@ -15,7 +15,7 @@ async function getAllUsers(req: Request, res: Response) {
     } catch(err: any) {
         console.error("Error in getAllUsers: ", err);
         return res.status(500).json({
-            error: "Server error fetching all users." 
+            error: "Failed to load all users." 
         });
     }
 }
@@ -42,12 +42,36 @@ async function getUserChats(req: Request, res: Response) {
     } catch(err: any) {
         console.error("Error in getUserChats: ", err);
         return res.status(500).json({
-            error: "Server error fetching user's chats." 
+            error: "Failed to load user's chats." 
         });
+    }
+}
+
+async function getUserById(
+    req: Request<{ userId: string }>, 
+    res: Response
+) {
+    try {
+        const { userId } = req.params
+
+        const profile = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+        if(!profile) return res.status(404).json({ error: "Profile does not exist." });
+        
+        return res.status(200).json({ 
+            profile 
+        });
+    } catch(err: any) {
+        console.error("Error in getUserById: ", err);
+        return res.status(500).json({
+            error: "Failed to load user's profile."
+        })
     }
 }
 
 export const userController = {
     getAllUsers,
-    getUserChats
+    getUserChats,
+    getUserById
 }
