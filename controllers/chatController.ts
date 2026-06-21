@@ -9,6 +9,13 @@ async function getGlobalChat(req: Request, res: Response) {
         const globalChat = await prisma.conversation.findUnique({
             where: {
                 id: "globalChat"
+            },
+            include: {
+                messages: {
+                    include: {
+                        sender: true
+                    }
+                }
             }
         });
         
@@ -28,13 +35,15 @@ async function postGlobalChat(req: Request, res: Response) {
     try {
         const { content } = req.body;
         const user = req.user as User;
-        if(!user) return res.status(401).json({ error: "User is not authenticated." });
 
         const message = await prisma.message.create({
             data: {
                 content,
                 senderId: user.id,
                 conversationId: "globalChat"
+            },
+            include: {
+                sender: true
             }
         });
         
