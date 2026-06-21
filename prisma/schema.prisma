@@ -26,8 +26,9 @@ model User {
   provider    Provider
 
   // relations
-  messages Message[]
-  sessions Session[]
+  messages      Message[]
+  sessions      Session[]
+  conversations Conversation[]
 
   @@index([id])
   @@map("users")
@@ -37,7 +38,8 @@ model Conversation {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  messages Message[]
+  messages     Message[]
+  participants User[]
 
   @@index([id])
   @@map("conversations")
