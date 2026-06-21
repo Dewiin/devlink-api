@@ -58,7 +58,70 @@ async function postGlobalChat(req: Request, res: Response) {
     }
 }
 
+async function getChatByRecipientId(
+    req: Request<{ recipientId: string }>, 
+    res: Response
+) {
+    try {
+        const { recipientId } = req.params;
+        const user = req.user as User;
+
+        let conversation = await prisma.conversation.findFirst({
+            where: {
+                AND: [
+                    {
+                        participants: {
+                            some: { id: recipientId }
+                        }
+                    },
+                    {
+                        participants: {
+                            some: { id: user.id }
+                        }
+                    }
+                ]
+            },
+            include: {
+                messages: {
+                    include: { sender: true },
+                    orderBy: { createdAt: "asc" }
+                }
+            }
+        });
+
+        if(!conversation) {
+            conversation = await prisma.conversation.create({
+                data: {
+                    participants: {
+                        connect: [
+                            { id: user.id },
+                            { id: recipientId }
+                        ]
+                    }
+                },
+                include: {
+                    messages: {
+                        include: { sender: true },
+                        orderBy: { createdAt: "asc" }   
+                    }
+                }
+            });
+        }
+
+        return res.status(200).json({
+            message: "Successfully fetched chat.",
+            conversation
+        });
+    } catch(err: any) {
+        console.error("Error in getChatByUserId: ", err);
+        return res.status(500).json({
+            error: "Chat failed to load."
+        })
+    }
+}
+
 export const chatController = {
     getGlobalChat,
-    postGlobalChat
+    postGlobalChat,
+    getChatByRecipientId
 }
