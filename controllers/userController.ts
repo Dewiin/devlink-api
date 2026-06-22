@@ -31,7 +31,13 @@ async function getUserChats(req: Request, res: Response) {
                 }
             },
             include: {
-                participants: true
+                participants: true,
+                messages: {
+                    take: 1,
+                    orderBy: {
+                        createdAt: "desc"
+                    }
+                }
             }
         });
 
