@@ -20,6 +20,33 @@ async function getAllUsers(req: Request, res: Response) {
     }
 }
 
+async function searchUserByName(
+    req: Request<{}, {}, {}, { search: string }>,
+    res: Response
+) {
+    try {
+        const { search } = req.query;
+
+        const users = await prisma.user.findMany({
+            where: {
+                displayName: {
+                    contains: search,
+                    mode: "insensitive"
+                }
+            }
+        });
+
+        return res.status(200).json({
+            users,
+        });
+    } catch(err: any) {
+        console.error("Error in searchUserByName: ", err);
+        return res.status(500).json({
+            error: "Failed to find user." 
+        });
+    }
+}
+
 async function getUserChats(req: Request, res: Response) {
     try {
         const user = req.user as User;
@@ -78,6 +105,7 @@ async function getUserById(
 
 export const userController = {
     getAllUsers,
+    searchUserByName,
     getUserChats,
     getUserById
 }
