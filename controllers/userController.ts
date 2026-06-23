@@ -77,16 +77,16 @@ async function getUserById(
 }
 
 async function searchUserByName(
-    req: Request<{}, {}, {}, { search: string }>,
+    req: Request<{}, {}, {}, { name: string }>,
     res: Response
 ) {
     try {
-        const { search } = req.query;
+        const { name } = req.query;
 
         const users = await prisma.user.findMany({
             where: {
                 displayName: {
-                    contains: search,
+                    contains: name,
                     mode: "insensitive"
                 }
             }
