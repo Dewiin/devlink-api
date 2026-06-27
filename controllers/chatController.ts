@@ -149,7 +149,7 @@ async function postChatByRecipientId(
         console.error("Error in postChatByRecipientId: ", err);
         return res.status(500).json({
             error: "Chat failed to load."
-        })
+        });
     }
 }
 

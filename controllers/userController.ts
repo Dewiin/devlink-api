@@ -20,11 +20,11 @@ async function getAllUsers(req: Request, res: Response) {
     }
 }
 
-async function getUserChats(req: Request, res: Response) {
+async function getUserConversations(req: Request, res: Response) {
     try {
         const user = req.user as User;
 
-        const chats = await prisma.conversation.findMany({
+        const conversations = await prisma.conversation.findMany({
             where: {
                 participants: {
                     some: { id: user.id },
@@ -42,8 +42,8 @@ async function getUserChats(req: Request, res: Response) {
         });
 
         return res.status(200).json({
-            message: "Successfully fetched user's chats.",
-            chats
+            message: "Successfully fetched user's conversations.",
+            conversations
         });
     } catch(err: any) {
         console.error("Error in getUserChats: ", err);
@@ -105,7 +105,7 @@ async function searchUserByName(
 
 export const userController = {
     getAllUsers,
-    getUserChats,
+    getUserConversations,
     getUserById,
     searchUserByName,
 }
