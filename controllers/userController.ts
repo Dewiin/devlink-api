@@ -1,4 +1,5 @@
 import { prisma } from "../config/prismaClient";
+import cloudinary from "cloudinary"
 
 // types
 import type { Request, Response } from "express"
@@ -58,7 +59,7 @@ async function getUserById(
     res: Response
 ) {
     try {
-        const { userId } = req.params
+        const { userId } = req.params;
 
         const profile = await prisma.user.findUnique({
             where: { id: userId },
@@ -103,9 +104,44 @@ async function searchUserByName(
     }
 }
 
+async function updateUserAvatar(
+    req: Request, 
+    res: Response
+) {
+    try {
+        const avatar = req.file;
+        if(!avatar) return res.status(404).json({ error: "Image file not found." });
+        
+        const user = req.user as User;
+
+        const result = await cloudinary.v2.uploader.upload(avatar.path, {
+            public_id: `${user.id}`,
+            asset_folder: "devlink/avatars",
+            use_asset_folder_as_public_id_prefix: true,
+        });
+
+        const avatarUrl = result.secure_url;
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { avatarUrl }
+        });
+
+        return res.status(200).json({
+            message: "Successfully updated avatar!",
+            avatarUrl,
+        });
+    } catch(err: any) {
+        console.error("Error in updateUser: ", err);
+        return res.status(500).json({
+            error: "Failed to update user." 
+        });
+    }
+}
+
 export const userController = {
     getAllUsers,
     getUserConversations,
     getUserById,
     searchUserByName,
+    updateUserAvatar,
 }
