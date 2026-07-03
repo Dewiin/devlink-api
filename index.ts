@@ -9,6 +9,7 @@ import { chatRouter } from "./routers/chatRouter";
 
 // config
 import "./config/passportConfig"
+import "./config/cloudinaryConfig"
 
 const app = express();
 
