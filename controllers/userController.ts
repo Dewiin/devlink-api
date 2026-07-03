@@ -1,5 +1,6 @@
 import { prisma } from "../config/prismaClient";
 import cloudinary from "cloudinary"
+import fs from "fs/promises"
 
 // types
 import type { Request, Response } from "express"
@@ -119,6 +120,7 @@ async function updateUserAvatar(
             asset_folder: "devlink/avatars",
             use_asset_folder_as_public_id_prefix: true,
         });
+        await fs.unlink(avatar.path);
 
         const avatarUrl = result.secure_url;
         await prisma.user.update({
