@@ -175,6 +175,33 @@ async function updateUserBanner(
     }
 }
 
+async function updateUserProfile(
+    req: Request,
+    res: Response
+) {
+    try {
+        const { displayName, bio } = req.body;
+        const user = req.user as User;
+
+        const updatedUser = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                displayName,
+                bio
+            }
+        });
+
+        return res.status(200).json({
+            message: "Successfully updated profile!",
+        });
+    } catch(err: any) {
+        console.error("Error in updateUserProfile: ", err);
+        return res.status(500).json({
+            error: "Failed to update user profile."
+        });
+    }
+}
+
 export const userController = {
     getAllUsers,
     getUserConversations,
@@ -182,4 +209,5 @@ export const userController = {
     searchUserByName,
     updateUserAvatar,
     updateUserBanner,
+    updateUserProfile
 }
