@@ -20,7 +20,10 @@ async function localVerifyFunction(
 ) {
     try {
         const user = await prisma.user.findUnique({
-            where: { email }
+            where: { 
+                email,
+                provider: "LOCAL"
+            }
         });
     
         if(!user) return done(null, false, { message: "User does not exist." });
@@ -46,7 +49,10 @@ async function googleVerifyFunction(
         if(!email) return cb(new Error("No email found in google profile."));
 
         const user = await prisma.user.upsert({
-            where: { email },
+            where: { 
+                email,
+                provider: "GOOGLE" 
+            },
             update: { displayName: profile.displayName },
             create: {
                 email,
@@ -69,7 +75,10 @@ async function githubVerifyFunction(
 ) {
     try {
         const user = await prisma.user.upsert({
-            where: { email: profile.profileUrl },
+            where: { 
+                email: profile.profileUrl,
+                provider: "GITHUB" 
+            },
             update: { displayName: profile.username || profile.displayName },
             create: {
                 email: profile.profileUrl,

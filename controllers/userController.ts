@@ -133,9 +133,44 @@ async function updateUserAvatar(
             avatarUrl,
         });
     } catch(err: any) {
-        console.error("Error in updateUser: ", err);
+        console.error("Error in updateUserAvatar: ", err);
         return res.status(500).json({
-            error: "Failed to update user." 
+            error: "Failed to update user avatar." 
+        });
+    }
+}
+
+async function updateUserBanner(
+    req: Request,
+    res: Response
+) {
+    try {
+        const banner = req.file;
+        if(!banner) return res.status(404).json({ error: "Image file not found." });
+        
+        const user = req.user as User;
+
+        const result = await cloudinary.v2.uploader.upload(banner.path, {
+            public_id: `${user.id}`,
+            asset_folder: "devlink/banners",
+            use_asset_folder_as_public_id_prefix: true,
+        });
+        await fs.unlink(banner.path);
+
+        const bannerUrl = result.secure_url;
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { bannerUrl }
+        });
+
+        return res.status(200).json({
+            message: "Successfully updated banner!",
+            bannerUrl,
+        });
+    } catch(err: any) {
+        console.error("Error in updateUserBanner: ", err);
+        return res.status(500).json({
+            error: "Failed to update user banner." 
         });
     }
 }
@@ -146,4 +181,5 @@ export const userController = {
     getUserById,
     searchUserByName,
     updateUserAvatar,
+    updateUserBanner,
 }

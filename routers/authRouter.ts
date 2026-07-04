@@ -25,7 +25,7 @@ authRouter.post(
     validateRequest, 
     passport.authenticate("local", {
         session: false,
-        failureRedirect: process.env.CLIENT_URL
+        failureRedirect: process.env.CLIENT_URL,
     }),
     authController.login
 );
