@@ -1,5 +1,6 @@
 import { prisma } from "../config/prismaClient";
 import cloudinary from "cloudinary"
+import bcrypt from "bcryptjs";
 import fs from "fs/promises"
 
 // types
@@ -202,6 +203,40 @@ async function updateUserProfile(
     }
 }
 
+async function updateUserPassword(
+    req: Request,
+    res: Response
+) {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const user = req.user as User;
+
+        const updateUser = await prisma.user.findUnique({
+            where: { id: user.id },
+        });
+        if(!updateUser) return res.status(401).json({ error: "User is not authenticated." });
+        if(!updateUser.password) return res.status(400).json({ error: "Account is associated with Google or GitHub." });
+        
+        const match = bcrypt.compare(oldPassword, updateUser.password);
+        if(!match) return res.status(403).json({ error: "Password is incorrect." });
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { password: hashedPassword }
+        });
+
+        return res.status(200).json({
+            message: "Password successfully updated!"
+        });
+    } catch(err: any) {
+        console.error("Error in updateUserPassword: ", err);
+        return res.status(500).json({
+            error: "Failed to update user password."
+        });
+    }
+}
+
 export const userController = {
     getAllUsers,
     getUserConversations,
@@ -209,5 +244,6 @@ export const userController = {
     searchUserByName,
     updateUserAvatar,
     updateUserBanner,
-    updateUserProfile
+    updateUserProfile,
+    updateUserPassword
 }
