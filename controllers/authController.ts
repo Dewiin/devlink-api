@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import passport from "passport"
 
 //config
 import { prisma } from "../config/prismaClient";
@@ -13,7 +14,7 @@ import {
 } from "../services/auth";
 
 // types
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import type { User } from "../generated/prisma/client";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY!;
@@ -67,35 +68,38 @@ async function signup(req: Request, res: Response) {
     }
 };
 
-async function login(req: Request, res: Response) {
+async function login(req: Request, res: Response, next: NextFunction) {
     try {
-        const user = req.user as User;
-
-        const { accessToken, refreshToken } = issueTokens(user);
-        const session = await createSession(user.id, refreshToken);
-        if(!session) return res.status(400).json({ error: "Failed to create session." });
-
-        const userDetails = {
-            id: user.id,
-            displayName: user.displayName,
-            email: user.email
-        }
-
-        return res.status(201)
-        .cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        })
-        .cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        })
-        .json({
-            message: "User successfully logged in!",
-            user: userDetails
-        });
+        passport.authenticate("local", async (err: any, user: User, info: any) => {
+            if(err) return res.status(500).json({ error: "Authentication failed." });
+            if(!user) return res.status(400).json({ error: info.message });
+    
+            const { accessToken, refreshToken } = issueTokens(user);
+            const session = await createSession(user.id, refreshToken);
+            if(!session) return res.status(400).json({ error: "Failed to create session." });
+    
+            const userDetails = {
+                id: user.id,
+                displayName: user.displayName,
+                email: user.email
+            }
+    
+            return res.status(201)
+            .cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            })
+            .cookie("accessToken", accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            })
+            .json({
+                message: "User successfully logged in!",
+                user: userDetails
+            });
+        })(req, res, next);
     } catch(err: any) {
         console.error("Error in login: ", err);
         return res.status(500).json({

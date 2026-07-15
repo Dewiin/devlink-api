@@ -46,12 +46,12 @@ async function googleVerifyFunction(
 ) {
     try {
         const email = profile.emails?.[0]?.value;
-        if(!email) return cb(new Error("No email found in google profile."));
+        if(!email) return cb(null, false, { message: "No email found in google profile." });
 
         const user = await prisma.user.upsert({
             where: { 
-                email,
-                provider: "GOOGLE" 
+                email, 
+                provider: "GOOGLE"
             },
             update: { displayName: profile.displayName },
             create: {
@@ -60,6 +60,7 @@ async function googleVerifyFunction(
                 provider: "GOOGLE"
             }
         });
+        if(!user) return cb(null, false, { message: "Email is linked to an existing account." });
 
         return cb(null, user);
     } catch(err: any) {

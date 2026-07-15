@@ -22,11 +22,7 @@ authRouter.post(
 authRouter.post(
     "/login", 
     authValidator.validateLogin, 
-    validateRequest, 
-    passport.authenticate("local", {
-        session: false,
-        failureRedirect: process.env.CLIENT_URL,
-    }),
+    validateRequest,
     authController.login
 );
 authRouter.get(
@@ -39,14 +35,13 @@ authRouter.get(
     "/google", 
     passport.authenticate("google", { 
         session: false,
-        prompt: "select_account" 
     })
 );
 authRouter.get(
     "/google/callback", 
     passport.authenticate("google", { 
         session: false,
-        failureRedirect: process.env.CLIENT_URL
+        failureRedirect: `${process.env.CLIENT_URL}/login`
     }),
     authController.oauthLogin
 );
@@ -62,7 +57,7 @@ authRouter.get(
     "/github/callback", 
     passport.authenticate("github", {
         session: false,
-        failureRedirect: process.env.CLIENT_URL
+        failureRedirect: `${process.env.CLIENT_URL}/login`
     }),
     authController.oauthLogin
 )
