@@ -41,7 +41,7 @@ authRouter.get(
     "/google/callback", 
     passport.authenticate("google", { 
         session: false,
-        failureRedirect: `${process.env.CLIENT_URL}/login`
+        failureRedirect: process.env.CLIENT_URL
     }),
     authController.oauthLogin
 );
@@ -57,7 +57,7 @@ authRouter.get(
     "/github/callback", 
     passport.authenticate("github", {
         session: false,
-        failureRedirect: `${process.env.CLIENT_URL}/login`
+        failureRedirect: process.env.CLIENT_URL
     }),
     authController.oauthLogin
 )
