@@ -15,7 +15,7 @@ const app = express();
 
 const allowedOrigins = [
     'http://localhost:5173',
-    'https://devlink-14de-ten.vercel.app'
+    'https://devlink-chat.vercel.app'
 ];
 app.use(cors({
     origin: function(origin, cb) {
