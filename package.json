@@ -23,6 +23,16 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^25.9.2",
+    "@types/passport": "^1.0.17",
+    "@types/passport-github": "^1.1.13",
+    "@types/passport-google-oauth20": "^2.0.17",
+    "@types/passport-local": "^1.0.38",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
@@ -40,18 +50,7 @@
     "prisma": "^7.8.0"
   },
   "devDependencies": {
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.2.0",
-    "@types/node": "^25.9.2",
-    "@types/passport": "^1.0.17",
-    "@types/passport-github": "^1.1.13",
-    "@types/passport-google-oauth20": "^2.0.17",
-    "@types/passport-local": "^1.0.38",
     "dotenv": "^17.4.2",
-    "prisma": "^7.8.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   }
