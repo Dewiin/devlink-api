@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import passport from "passport"
 
 //config
-import { prisma } from "../config/prismaClient";
+import { prisma } from "../config/prismaClient.js";
 
 // services
 import { 
@@ -11,11 +11,11 @@ import {
     getRefreshHashToken,
     createSession, 
     deleteSession, 
-} from "../services/auth";
+} from "../services/auth.js";
 
 // types
 import type { Request, Response, NextFunction } from "express";
-import type { User } from "../generated/prisma/client";
+import type { User } from "../generated/prisma/client.js";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY!;
 const JWT_REFRESH_KEY = process.env.JWT_REFRESH_KEY!;

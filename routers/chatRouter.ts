@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { chatController } from "../controllers/chatController";
+import { chatController } from "../controllers/chatController.js";
 
 // middleware
-import { verifyAuth } from "../middleware/verifyAuth";
-import { messageValidator } from "../middleware/messageValidator";
+import { verifyAuth } from "../middleware/verifyAuth.js";
+import { messageValidator } from "../middleware/messageValidator.js";
 
 export const chatRouter = Router();
 

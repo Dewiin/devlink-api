@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { userController } from "../controllers/userController";
+import { userController } from "../controllers/userController.js";
 import multer from "multer"
 
 // middleware
-import { verifyAuth } from "../middleware/verifyAuth";
-import { profileValidator } from "../middleware/profileValidator";
-import { validateRequest } from "../middleware/validateRequest";
+import { verifyAuth } from "../middleware/verifyAuth.js";
+import { profileValidator } from "../middleware/profileValidator.js";
+import { validateRequest } from "../middleware/validateRequest.js";
 
 export const userRouter = Router();
 const upload = multer({dest: "uploads/"})

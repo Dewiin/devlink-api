@@ -1,4 +1,4 @@
-import { prisma } from "../config/prismaClient"
+import { prisma } from "../config/prismaClient.js"
 
 async function main() {
     const globalChat = await prisma.conversation.findUnique({

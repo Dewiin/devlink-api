@@ -1,4 +1,4 @@
-import { prisma } from "../config/prismaClient";
+import { prisma } from "../config/prismaClient.js";
 import { body } from "express-validator";
 
 const emailValidator = body("email")

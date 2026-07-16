@@ -1,11 +1,11 @@
-import { prisma } from "../config/prismaClient";
+import { prisma } from "../config/prismaClient.js";
 import cloudinary from "cloudinary"
 import bcrypt from "bcryptjs";
 import fs from "fs/promises"
 
 // types
 import type { Request, Response } from "express"
-import type { User } from "../generated/prisma/client";
+import type { User } from "../generated/prisma/client.js";
 
 async function getAllUsers(req: Request, res: Response) {
     try {

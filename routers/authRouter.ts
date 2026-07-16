@@ -1,11 +1,11 @@
 import passport from "passport"
 import { Router } from "express";
-import { authController } from "../controllers/authController";
+import { authController } from "../controllers/authController.js";
 
 // middleware
-import { authValidator } from "../middleware/authValidator";
-import { validateRequest } from "../middleware/validateRequest";
-import { verifyAuth } from "../middleware/verifyAuth";
+import { authValidator } from "../middleware/authValidator.js";
+import { validateRequest } from "../middleware/validateRequest.js";
+import { verifyAuth } from "../middleware/verifyAuth.js";
 
 export const authRouter = Router();
 

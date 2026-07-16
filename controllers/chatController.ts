@@ -1,8 +1,8 @@
-import { prisma } from "../config/prismaClient"
+import { prisma } from "../config/prismaClient.js"
 
 // types
 import type { Request, Response } from "express"
-import type { User } from "../generated/prisma/client";
+import type { User } from "../generated/prisma/client.js";
 
 async function getGlobalChat(req: Request, res: Response) {
     try {

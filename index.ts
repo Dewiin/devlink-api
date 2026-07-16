@@ -3,13 +3,13 @@ import cors from "cors"
 import cookieParser from "cookie-parser";
 
 // routers
-import { authRouter } from "./routers/authRouter";
-import { userRouter } from "./routers/userRouter";
-import { chatRouter } from "./routers/chatRouter";
+import { authRouter } from "./routers/authRouter.js";
+import { userRouter } from "./routers/userRouter.js";
+import { chatRouter } from "./routers/chatRouter.js";
 
 // config
-import "./config/passportConfig"
-import "./config/cloudinaryConfig"
+import "./config/passportConfig.js"
+import "./config/cloudinaryConfig.js"
 
 const app = express();
 

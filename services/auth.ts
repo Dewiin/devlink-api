@@ -2,10 +2,10 @@ import jwt from "jsonwebtoken"
 import crypto from "crypto"
 
 // config
-import { prisma } from "../config/prismaClient"
+import { prisma } from "../config/prismaClient.js"
 
 // types
-import type { User } from "../generated/prisma/client"
+import type { User } from "../generated/prisma/client.js"
 import type { Request } from "express"
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY!;
